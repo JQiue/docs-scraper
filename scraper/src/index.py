@@ -142,6 +142,8 @@ def run_config(config):
         # meilisearch_helper.report_crawling_issue()
         sys.exit(EXIT_CODE_NO_RECORD)
     print("")
+    MeiliSearchHelper.SETTINGS["distinctAttribute"] = "url"
+    meilisearch_helper.add_settings(MeiliSearchHelper.SETTINGS, config.custom_settings)
 
 
 if __name__ == "__main__":
