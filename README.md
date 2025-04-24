@@ -46,30 +46,43 @@ This scraper is used in production and runs on the [Meilisearch documentation](h
 
 ## Table of Contents <!-- omit in TOC -->
 
+- [Table of Contents ](#table-of-contents-)
 - [⚡ Supercharge your Meilisearch experience](#-supercharge-your-meilisearch-experience)
 - [⚙️ Usage](#️-usage)
   - [Run your Meilisearch Instance](#run-your-meilisearch-instance)
   - [Set your Config File](#set-your-config-file)
   - [Run the Scraper](#run-the-scraper)
+    - [From Source Code ](#from-source-code-)
+    - [With Docker ](#with-docker-)
+    - [In a GitHub Action ](#in-a-github-action-)
+    - [About the API Key ](#about-the-api-key-)
 - [🖌 And for the front-end search bar?](#-and-for-the-front-end-search-bar)
 - [🛠 More Configurations](#-more-configurations)
   - [More About the Selectors](#more-about-the-selectors)
+    - [Bases ](#bases-)
+    - [The Levels ](#the-levels-)
   - [All the Config File Settings](#all-the-config-file-settings)
     - [`index_uid`](#index_uid)
     - [`start_urls`](#start_urls)
+      - [Using Page Rank ](#using-page-rank-)
     - [`stop_urls` (optional)](#stop_urls-optional)
+    - [`only_urls` （optional）](#only_urls-optional)
     - [`selectors_key` (optional)](#selectors_key-optional)
     - [`scrape_start_urls` (optional)](#scrape_start_urls-optional)
     - [`sitemap_urls` (optional)](#sitemap_urls-optional)
     - [`sitemap_alternate_links` (optional)](#sitemap_alternate_links-optional)
     - [`selectors_exclude` (optional)](#selectors_exclude-optional)
     - [`custom_settings` (optional)](#custom_settings-optional)
+      - [Example:](#example)
     - [`min_indexed_level` (optional)](#min_indexed_level-optional)
     - [`only_content_level` (optional)](#only_content_level-optional)
     - [`js_render` (optional)](#js_render-optional)
     - [`js_wait` (optional)](#js_wait-optional)
     - [`allowed_domains` (optional)](#allowed_domains-optional)
   - [Authentication](#authentication)
+    - [Basic HTTP ](#basic-http-)
+    - [Cloudflare Access: Identity and Access Management ](#cloudflare-access-identity-and-access-management-)
+    - [Keycloak Access: Identity and Access Management ](#keycloak-access-identity-and-access-management-)
   - [Installing Chrome Headless](#installing-chrome-headless)
 - [🤖 Compatibility with Meilisearch](#-compatibility-with-meilisearch)
 - [⚙️ Development Workflow and Contributing](#️-development-workflow-and-contributing)
@@ -325,6 +338,16 @@ The scraper will not follow links that match `stop_urls`.
 {
   "start_urls": ["https://www.example.com/docs"],
   "stop_urls": ["https://www.example.com/about-us"]
+}
+```
+
+#### `only_urls` （optional）
+
+When `only_urls` have values, the scraper will only crawl these pages
+
+```json
+{
+  "only_urls": ["https://www.example.com/docs/concepts/"]
 }
 ```
 
