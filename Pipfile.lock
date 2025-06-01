@@ -1192,11 +1192,12 @@
         },
         "zipp": {
             "hashes": [
-                "sha256:679e51dd4403591b2d6838a48de3d283f3d188412a9782faadf845f298736ba0",
-                "sha256:ebc15946aa78bd63458992fc81ec3b6f7b1e92d51c35e6de1c3804e73b799147"
+                "sha256:dd2f28c3ce4bc67507bfd3781d21b7bb2be31103b51a4553ad7d90b84e57ace5",
+                "sha256:fe208f65f2aca48b81f9e6fd8cf7b8b32c26375266b009b413d45306b6148343"
             ],
-            "markers": "python_version < '3.8'",
-            "version": "==3.16.2"
+            "index": "pypi",
+            "markers": "python_version >= '3.9'",
+            "version": "==3.22.0"
         }
     }
 }
