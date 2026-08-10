@@ -1,6 +1,6 @@
 [package]
-name = "1.0.0-rc.1"
-version = "0.0.0"
+name = "docs-scraper"
+version = "1.0.0-rc.1"
 edition = "2024"
 publish = false
 
