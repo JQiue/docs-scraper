@@ -1,0 +1,10 @@
+style_edition = "2024"
+
+tab_spaces = 2
+use_field_init_shorthand = true
+
+group_imports = "StdExternalCrate"
+imports_granularity = "Crate"
+format_strings = false
+condense_wildcard_suffixes = true
+enum_discrim_align_threshold = 20

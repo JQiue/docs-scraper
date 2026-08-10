@@ -1,23 +1,12 @@
-FROM python:3.10.8-slim-bullseye
-
-ENV LC_ALL C.UTF-8
-ENV LANG C.UTF-8
-
-WORKDIR /docs-scraper
-
-RUN : \
-  && apt-get update -y \
-  && apt-get install -y --no-install-recommends \
-  libnss3 \
-  chromium-driver \
-  && apt-get clean \
-  && rm -rf /var/lib/apt/lists/*
-
-RUN pip install -U pip && pip install pipenv --no-cache-dir
-
-COPY Pipfile Pipfile
-COPY Pipfile.lock Pipfile.lock
-
-RUN pipenv install
-
+# rust:alpine ships a musl toolchain by default, so the resulting
+FROM rust:1-alpine AS builder
+RUN apk add --no-cache musl-dev
+WORKDIR /app
 COPY . .
+RUN cargo build --release --target x86_64-unknown-linux-musl
+
+# ---- runtime stage: nothing but the binary ----
+FROM scratch
+WORKDIR /app
+COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/docs-scraper /app/docs-scraper
+ENTRYPOINT ["/app/docs-scraper"]
