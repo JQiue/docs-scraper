@@ -24,9 +24,43 @@
 
 ## 用法
 
+### 运行之前
+
+1. 确认 MeiliSearch 服务是否启动
+2. 用于抓取器的 api_key 是否拥有以下权限：`indexes.get, settings.update, documents.add, documents.delete, tasks.get`，建议使用最小权限，避免使用 master key
+3. 创建`config.json`，配置如下：
+
+```json
+{
+  "start_urls": [
+    "https://example.com"
+  ],
+  "sitemap_urls": [
+    "https://example.com/sitemap.xml"
+  ],
+  "selectors": {
+    "lvl0": {
+      "selector": ".vp-page-title h1",
+      "global": true,
+      "default_value": "文档"
+    },
+    "lvl1": "[vp-content] h2",
+    "lvl2": "[vp-content] h3",
+    "lvl3": "[vp-content] h4",
+    "lvl4": "[vp-content] h5",
+    "lvl5": "[vp-content] h6",
+    "content": "[vp-content] p, [vp-content] li"
+  },
+  "meilisearch": {
+    "host": "https://search.example.com",
+    "index_uid": "index-name"
+  }
+}
+```
+
 ### 从可执行文件中运行
 
-默认读取根目录的 `config.json`：
+在运行命令的当前目录下放置`config.json`，并通过环境变量传入 API key（会覆盖配置文件中的 `meilisearch.api_key` 字段）：
 
 ```sh
 export MEILISEARCH_API_KEY=your_meilisearch_api_key
@@ -39,8 +73,8 @@ export MEILISEARCH_API_KEY=your_meilisearch_api_key
 ```sh
 docker run -t --rm \
     -e MEILISEARCH_API_KEY=<your-meilisearch-api-key> \
-    -v <absolute-path-to-your-config-file>:/app/config.json:ro \
-    jqiue/docs-scraper:1
+    -v <absolute-path-to-your-config-file>:/config.json:ro \
+    jqiue/docs-scraper:next
 ```
 
 ### Docker Compose
@@ -48,21 +82,41 @@ docker run -t --rm \
 ```yml
 services:
   docs-scraper:
-    image: jqiue/docs-scraper:1
+    image: jqiue/docs-scraper:next
     container_name: docs-scraper
     environment:
       - MEILISEARCH_API_KEY=${MEILISEARCH_API_KEY}
     volumes:
-      - ${PWD}/config.json:/app/config.json:ro
+      - ${PWD}/config.json:/config.json:ro
 ```
 
 ## 配置
 
+### 字段总览
+
+| 字段                        | 必填 | 默认值   | 说明                                                                        |
+| --------------------------- | ---- | -------- | --------------------------------------------------------------------------- |
+| `meilisearch.host`          | ✅    | -        | MeiliSearch 服务地址                                                        |
+| `meilisearch.index_uid`     | ✅    | -        | 索引名称                                                                    |
+| `meilisearch.api_key`       | ❌    | 空       | 会被 `MEILISEARCH_API_KEY` 环境变量覆盖，推荐用环境变量                     |
+| `meilisearch.patch_size`    | ❌    | `500`    | 每批导入的记录数                                                            |
+| `meilisearch.index_setting` | ❌    | 内置默认 | 索引设置，见下文                                                            |
+| `start_urls`                | ⚠️    | `[]`     | 起始页面，与 `sitemap_urls`、`only_urls` 至少配置其一，否则不会抓取任何页面 |
+| `sitemap_urls`              | ⚠️    | `[]`     | Sitemap 地址，同上                                                          |
+| `only_urls`                 | ⚠️    | `[]`     | 增量白名单，配置后 `start_urls`、`sitemap_urls`、`stop_urls` 均不生效       |
+| `stop_urls`                 | ❌    | `[]`     | 精确匹配跳过的 URL                                                          |
+| `selectors`                 | ⚠️    | `{}`     | 抽取规则，至少配置 `content`，否则无法抽取正文                              |
+| `page_rank`                 | ❌    | `[]`     | 页面排序权重，未匹配时默认 `0`                                              |
+| `crawl`                     | ❌    | 内置默认 | 并发、上限、超时、UA，见下文                                                |
+
+> ✅ = 必须配置；⚠️ = 可省略但功能上需要；❌ = 可选，省略时使用默认值。
+
 ### `crawl`
 
-- `max_pages` 是最多尝试访问的页面数。
-- `concurrency` 是并发请求数。
-- `timeout_seconds` 是请求超时。
+- `concurrency` 并发请求数，默认 `4`。
+- `max_pages` 最多尝试访问的页面数，默认 `1000`。
+- `timeout_seconds` 请求超时秒数，默认 `60`。
+- `user_agent` 自定义请求 UA，不设置时默认 `docs-scraper`。
 
 ```json
 {
@@ -84,8 +138,6 @@ services:
 }
 ```
 
-全量写入 Meilisearch 前会删除索引中的旧文档，然后分批导入本次结果。
-
 ### `sitemap_urls`
 
 ```json
@@ -96,7 +148,7 @@ services:
 
 ### `only_urls`
 
-当 `only_urls` 非空时，`start_urls` 和 `sitemap_urls` 都不会生效。抓取器将将严格按照指定 url 进行增量抓取，写入 Meilisearch 前，会按以下条件删除这些页面的所有旧记录：
+当 `only_urls` 非空时，`start_urls` 和 `sitemap_urls` 都不会生效。抓取器将严格按照指定 url 进行增量抓取，不扩展页面链接（`stop_urls` 同样不生效）。写入 Meilisearch 前，会按以下条件删除这些页面的所有旧记录：
 
 ```text
 url_without_anchor = 页面 URL
@@ -115,6 +167,8 @@ url_without_anchor = 页面 URL
 
 ### `stop_urls`
 
+与待抓取 URL 完全相等时跳过该页面（忽略 fragment 差异）
+
 ```json
 {
   "stop_urls": []
@@ -123,7 +177,7 @@ url_without_anchor = 页面 URL
 
 ### `selectors`
 
-`global: true` 的 Selector 每页只执行一次。找到有效文本时使用实际文本；找不到时使用 `default_value`；之后正文记录会继承该层级。
+每个 Selector 的 `selector` 可以是纯字符串，也可以是带 `global` 和 `default_value` 的对象。`global: true` 的 Selector 每页只执行一次：找到有效文本时使用实际文本，找不到时使用 `default_value`；之后正文记录会继承该层级。
 
 ```json
 {
@@ -146,7 +200,7 @@ url_without_anchor = 页面 URL
 
 ### `page_rank`
 
-没有匹配规则时默认是 `0`，不需要额外配置默认值：
+没有匹配规则时默认为 `0`：
 
 ```json
 {
@@ -181,11 +235,17 @@ url_without_anchor = 页面 URL
 }
 ```
 
-抓取器使用 `objectID` 作为主键，增量删除依赖 `url_without_anchor`，因此该字段必须配置为 `filterable_attributes`。
+- `displayed_attributes` 控制搜索结果返回的字段，默认包含 `hierarchy_*`、`content`、`url`、`anchor`、`lang`、`objectID`、`page_rank`、`level`、`position` 等全部字段。
+- `searchable_attributes` 控制参与搜索的字段，默认包含 `hierarchy_*` 与 `content`。
+- `filterable_attributes` 默认包含 `lang` 与 `url_without_anchor`。**增量删除依赖 `url_without_anchor`，因此该字段不能从过滤属性中移除。**
+- `sortable_attributes` 默认为空。
+- `ranking_rules` 默认按 `words → typo → attribute → proximity → exactness → page_rank:desc → level:desc → position:asc` 排序。
+
+以上字段均可省略，省略时使用默认值。
 
 ## 数据字段说明
 
-这里解释推送到 MeiliSearch 文档的字段：
+推送到 MeiliSearch 文档的字段：
 
 | 字段                 | 含义                                              |
 | -------------------- | ------------------------------------------------- |
