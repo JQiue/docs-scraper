@@ -3,11 +3,7 @@ FROM rust:1.96.1-alpine3.24 AS builder
 RUN apk add --no-cache musl-dev
 # RUN rustup target add x86_64-unknown-linux-musl
 WORKDIR /docs-scraper
-COPY Cargo.toml Cargo.lock ./
-RUN mkdir src \
-  && echo 'fn main() {}' > src/main.rs \
-  && cargo build --release --target x86_64-unknown-linux-musl
-COPY src ./src
+COPY . .
 RUN cargo build --release --target x86_64-unknown-linux-musl
 
 # runtime stage: nothing but the binary
