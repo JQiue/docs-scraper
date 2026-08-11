@@ -1,13 +1,16 @@
-# rust:alpine ships a musl toolchain by default, so the resulting
+# rust:alpine ships a musl toolchain by default
 FROM rust:1.96.1-alpine3.24 AS builder
 RUN apk add --no-cache musl-dev
 # RUN rustup target add x86_64-unknown-linux-musl
-WORKDIR /app
-COPY . .
+WORKDIR /docs-scraper
+COPY Cargo.toml Cargo.lock ./
+RUN mkdir src \
+  && echo 'fn main() {}' > src/main.rs \
+  && cargo build --release --target x86_64-unknown-linux-musl
+COPY src ./src
 RUN cargo build --release --target x86_64-unknown-linux-musl
 
-# ---- runtime stage: nothing but the binary ----
+# runtime stage: nothing but the binary
 FROM scratch
-WORKDIR /app
-COPY --from=builder /app/target/x86_64-unknown-linux-musl/release/docs-scraper /app/docs-scraper
-ENTRYPOINT ["/app/docs-scraper"]
+COPY --from=builder /docs-scraper/target/x86_64-unknown-linux-musl/release/docs-scraper /docs-scraper
+ENTRYPOINT ["/docs-scraper"]
