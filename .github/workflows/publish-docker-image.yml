@@ -28,6 +28,9 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           # tags: jqiue/docs-scraper:latest,jqiue/docs-scraper:${{ github.ref_name }}
+          # tags: |
+          #   jqiue/docs-scraper:${{ github.ref_name }}
+          #   ${{ !contains(github.ref_name, '-') && 'jqiue/docs-scraper:latest' || '' }}
           tags: |
             jqiue/docs-scraper:${{ github.ref_name }}
-            ${{ !contains(github.ref_name, '-') && 'jqiue/docs-scraper:latest' || '' }}
+            ${{ contains(github.ref_name, '-') && 'jqiue/docs-scraper:next' || 'jqiue/docs-scraper:latest' }}
