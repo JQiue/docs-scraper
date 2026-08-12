@@ -27,7 +27,7 @@
 ### 运行之前
 
 1. 确认 MeiliSearch 服务是否启动
-2. 用于抓取器的 api_key 是否拥有以下权限：`indexes.get, settings.update, documents.add, documents.delete, tasks.get`，建议使用最小权限，避免使用 master key
+2. 用于抓取器的 api_key 是否拥有以下权限：`indexes.get, indexes.create, settings.update, documents.add, documents.delete, tasks.get`，建议使用最小权限，避免使用 master key
 3. 创建`config.json`，配置如下：
 
 ```json
