@@ -76,7 +76,7 @@ pub async fn preflight_check(config: &MeilisearchConfig) -> Result<(), String> {
 
   let client = Client::new(&config.host, Some(&config.api_key)).map_err(|e| {
     format!(
-      "MeiliSearch client initialization failed (host: {}) : {e}",
+      "MeiliSearch: MeiliSearch client initialization failed (host: {}) : {e}",
       config.host
     )
   })?;
@@ -84,28 +84,28 @@ pub async fn preflight_check(config: &MeilisearchConfig) -> Result<(), String> {
   // Health Check
   if let Err(e) = client.health().await {
     return Err(format!(
-      "Unable to connect to MeiliSearch ({}): {e}. Please check the meilisearch.host configuration, service status and network connectivity.",
+      "MeiliSearch: Unable to connect to MeiliSearch ({}): {e}. Please check the meilisearch.host configuration, service status and network connectivity.",
       config.host
     ));
   }
 
-  println!("MeiliSearch host is available.");
+  println!("MeiliSearch: MeiliSearch host is available.");
 
   // API key permission check: Read the target index and verify whether the key is valid and has index access permission.
   match client.get_index(&config.index_uid).await {
     Ok(_) => {
-      println!("The API key is valid and the index \"{}\" is accessible.", config.index_uid);
+      println!("MeiliSearch: The API key is valid and the index \"{}\" is accessible.", config.index_uid);
       Ok(())
     }
     Err(Error::Meilisearch(e)) if e.error_code == ErrorCode::InvalidApiKey => {
-      Err("API key is invalid (invalid_api_key). Please check whether the MEILISEARCH_API_KEY environment variable is set correctly.".into())
+      Err("MeiliSearch: API key is invalid (invalid_api_key). Please check whether the MEILISEARCH_API_KEY environment variable is set correctly.".into())
     }
     Err(Error::Meilisearch(e)) if e.error_code == ErrorCode::MissingAuthorizationHeader => {
       Err("No valid Authorization header (missing_authorization_header) was provided. Please set the MEILISEARCH_API_KEY environment variable.".into())
     }
     Err(Error::Meilisearch(e)) if e.error_code == ErrorCode::IndexNotFound => {
       // Meilisearch also returns index_not_found for indexes without permission. It is impossible to distinguish them and prompt them together.
-      println!("The index \"{}\" does not exist yet (it will be automatically created during the first run). If the index already exists, please confirm that the API key has the permissions for this index: indexes.get, settings.update, documents.add, documents.delete, tasks.get", config.index_uid);
+      println!("MeiliSearch: The index \"{}\" does not exist yet (it will be automatically created during the first run). If the index already exists, please confirm that the API key has the permissions for this index: indexes.get, settings.update, documents.add, documents.delete, tasks.get", config.index_uid);
       Ok(())
     }
     Err(e) => Err(format!("MeiliSearch check failed: {e}")),
