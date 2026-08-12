@@ -140,7 +140,7 @@ pub struct PageRankRule {
 }
 
 /// HTTP 抓取的资源限制和请求参数。
-#[derive(Deserialize, Debug, Default)]
+#[derive(Deserialize, Debug)]
 pub struct CrawlConfig {
   #[serde(default = "default_concurrency")]
   pub concurrency: usize,
@@ -150,6 +150,17 @@ pub struct CrawlConfig {
   pub timeout_seconds: u64,
   #[serde(default)]
   pub user_agent: Option<String>,
+}
+
+impl Default for CrawlConfig {
+  fn default() -> Self {
+    Self {
+      concurrency: default_concurrency(),
+      max_pages: default_max_pages(),
+      timeout_seconds: default_timeout_seconds(),
+      user_agent: Default::default(),
+    }
+  }
 }
 
 #[derive(Deserialize, Debug)]
