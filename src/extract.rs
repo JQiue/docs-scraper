@@ -206,7 +206,10 @@ fn make_record(
     "{url_without_anchor}|{record_type}|{}|{position}",
     anchor.as_deref().unwrap_or("")
   );
-  let object_id = format!("{:x}", Sha256::digest(identity.as_bytes()));
+  let object_id = Sha256::digest(identity.as_bytes())
+    .iter()
+    .map(|b| format!("{b:02x}"))
+    .collect::<String>();
   let mut fields = HierarchyFields::default();
   let levels = [
     &mut fields.lvl0,
