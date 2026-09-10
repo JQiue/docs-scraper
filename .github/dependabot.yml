@@ -6,7 +6,6 @@ updates:
       interval: "quarterly"
       time: "08:00"
       timezone: Asia/Shanghai
-    rebase-strategy: disabled
 
   - package-ecosystem: cargo
     directory: "/"
@@ -15,4 +14,3 @@ updates:
       time: "08:00"
       timezone: Asia/Shanghai
     open-pull-requests-limit: 10
-    rebase-strategy: disabled
