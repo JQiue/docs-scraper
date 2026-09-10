@@ -6,9 +6,6 @@ updates:
       interval: "quarterly"
       time: "08:00"
       timezone: Asia/Shanghai
-    labels:
-      - "skip-changelog"
-      - "dependencies"
     rebase-strategy: disabled
 
   - package-ecosystem: cargo
@@ -18,7 +15,4 @@ updates:
       time: "08:00"
       timezone: Asia/Shanghai
     open-pull-requests-limit: 10
-    labels:
-      - skip-changelog
-      - dependencies
     rebase-strategy: disabled
