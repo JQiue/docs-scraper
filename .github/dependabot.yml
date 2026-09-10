@@ -21,3 +21,5 @@ updates:
       cargo-dependencies:
         patterns:
           - "*"
+        update-types:
+          - patch
