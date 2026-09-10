@@ -6,6 +6,10 @@ updates:
       interval: "quarterly"
       time: "08:00"
       timezone: Asia/Shanghai
+    groups:
+      github-actions:
+        patterns:
+          - "*"
 
   - package-ecosystem: cargo
     directory: "/"
@@ -13,4 +17,7 @@ updates:
       interval: "quarterly"
       time: "08:00"
       timezone: Asia/Shanghai
-    open-pull-requests-limit: 10
+    groups:
+      cargo-dependencies:
+        patterns:
+          - "*"
